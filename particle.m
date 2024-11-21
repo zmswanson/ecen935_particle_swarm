@@ -14,10 +14,13 @@ classdef particle < handle
         best_pos_x
         best_pos_y
         best_val
+        crnt_val
+        no_progress_count
+        threshold
     end
 
     methods
-        function obj = particle(pos_x, pos_y, vel_x, vel_y, fitness_func)
+        function obj = particle(pos_x, pos_y, vel_x, vel_y, fit_fn, threshold)
             obj.pos_x = pos_x;
             obj.pos_y = pos_y;
             obj.vel_x = vel_x;
@@ -26,8 +29,12 @@ classdef particle < handle
             obj.best_pos_x = pos_x;
             obj.best_pos_y = pos_y;
 
-            obj.fitness_func = fitness_func;
-            obj.best_val = obj.fitness_func(obj.pos_x, obj.pos_y);
+            obj.fitness_func = fit_fn;
+            obj.crnt_val = obj.fitness_func(obj.pos_x, obj.pos_y);
+            obj.best_val = obj.crnt_val;
+
+            obj.no_progress_count = 0;
+            obj.threshold = threshold;
         end
 
         function [x, y] = update(obj, c1, c2, w, gbest_x, gbest_y, ...
@@ -83,6 +90,14 @@ classdef particle < handle
                 obj.best_pos_x = obj.pos_x;
                 obj.best_pos_y = obj.pos_y;
             end
+
+            if abs(val - obj.crnt_val) < obj.threshold
+                obj.no_progress_count = obj.no_progress_count + 1;
+            else
+                obj.no_progress_count = 0;
+            end
+
+            obj.crnt_val = val;
 
             x = obj.pos_x;
             y = obj.pos_y;
