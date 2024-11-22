@@ -2,9 +2,14 @@
     File: main.m
     Author: Zachary M Swanson
     Date: 11-20-2024
+    Description: This file contains the main script which is used to run the
+    particle swarm optimization algorithm on the given fitness function. The
+    script will run the algorithm with the given parameters and save the results
+    to a file. It will also run an ablation study on the parameters to determine
+    the effect of each parameter on the performance of the algorithm.
 %}
 
-% Define the fitness function
+% Define the six-hump camel back function as the fitness function
 function z = fitness_func(x, y)
     z = (4 - 2.1 * x.^2 + x.^4/3) .* x.^2 + x.*y + (-4 + 4 * y.^2) .* y.^2;
 end

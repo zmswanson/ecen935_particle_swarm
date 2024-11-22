@@ -2,6 +2,11 @@
     File: particle.m
     Author: Zachary M Swanson
     Date: 11-20-2024
+    Description: This file contains the particle class which is used to represent
+    a particle in the particle swarm optimization algorithm. The particle class
+    contains properties for the position, velocity, fitness function, and best
+    position of the particle. It also contains methods to update the particle's
+    position and velocity based on the particle swarm optimization algorithm.
 %}
 
 classdef particle < handle
@@ -29,6 +34,8 @@ classdef particle < handle
             obj.best_pos_x = pos_x;
             obj.best_pos_y = pos_y;
 
+            % Evaluate the fitness function at the initial position to get the
+            % initial p_best value
             obj.fitness_func = fit_fn;
             obj.crnt_val = obj.fitness_func(obj.pos_x, obj.pos_y);
             obj.best_val = obj.crnt_val;
@@ -37,6 +44,7 @@ classdef particle < handle
             obj.threshold = threshold;
         end
 
+        % Update the particle's position and velocity based on the PSO algorithm
         function [x, y] = update(obj, c1, c2, w, gbest_x, gbest_y, ...
                 max_x, max_y, min_x, min_y, max_vel)
             phi_1 = rand();
@@ -51,9 +59,11 @@ classdef particle < handle
             social_x = c2 * phi_2 * (gbest_x - obj.pos_x);
             social_y = c2 * phi_2 * (gbest_y - obj.pos_y);
 
+            % Combine the three components to get the new velocity
             obj.vel_x = inertia_x + cognitive_x + social_x;
             obj.vel_y = inertia_y + cognitive_y + social_y;
 
+            % Limit the velocity if necessary
             if max_vel > 0
                 if obj.vel_x > max_vel
                     obj.vel_x = max_vel;
@@ -68,9 +78,11 @@ classdef particle < handle
                 end
             end
 
+            % Update the particle's position
             obj.pos_x = obj.pos_x + obj.vel_x;
             obj.pos_y = obj.pos_y + obj.vel_y;
             
+            % Ensure the particle stays within the search space
             if obj.pos_x > max_x
                 obj.pos_x = max_x;
             elseif obj.pos_x < min_x
@@ -83,14 +95,17 @@ classdef particle < handle
                 obj.pos_y = min_y;
             end
 
+            % Evaluate the new position with the fitness function
             val = obj.fitness_func(obj.pos_x, obj.pos_y);
 
+            % Update the best position if necessary
             if val < obj.best_val
                 obj.best_val = val;
                 obj.best_pos_x = obj.pos_x;
                 obj.best_pos_y = obj.pos_y;
             end
 
+            % Check for progress
             if abs(val - obj.crnt_val) < obj.threshold
                 obj.no_progress_count = obj.no_progress_count + 1;
             else

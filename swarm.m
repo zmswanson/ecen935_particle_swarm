@@ -2,6 +2,10 @@
     File: swarm.m
     Author: Zachary M Swanson
     Date: 11-20-2024
+    Description: This file contains the swarm class which is used to implement
+    the particle swarm optimization algorithm. The swarm class is used to
+    initialize a swarm of particles and run the optimization algorithm to find
+    the minimum value of a given fitness function.
 %}
 
 classdef swarm < handle
@@ -48,6 +52,8 @@ classdef swarm < handle
 
             obj.particles = particle.empty(obj.num_particles, 0);
             for i = 1:obj.num_particles
+                % Randomly initialize the position and velocity of the particle
+                % within the bounds of the search space
                 pos_x = rand() * (obj.max_x - obj.min_x) + obj.min_x;
                 pos_y = rand() * (obj.max_y - obj.min_y) + obj.min_y;
                 vel_x = 0;
@@ -59,6 +65,7 @@ classdef swarm < handle
                 obj.history(1, i, 2) = pos_y;
                 obj.history(1, i, 3) = obj.particles(i).crnt_val;
 
+                % Update the global best position based on the initial positions
                 if i == 1
                     obj.gbest_x = obj.particles(i).pos_x;
                     obj.gbest_y = obj.particles(i).pos_y;
@@ -79,17 +86,21 @@ classdef swarm < handle
             for i = 1:obj.num_iterations
                 no_progress = true;
 
+                % Loop through each particle and update its position
                 for j = 1:obj.num_particles
                     obj.particles(j).update(obj.accel_c1, ...
                         obj.accel_c2, obj.inertia_w, obj.gbest_x, ...
                         obj.gbest_y, obj.max_x, obj.max_y, obj.min_x, ...
                         obj.min_y, obj.max_vel);
 
+                    % Update the current value of the particle in the history
+                    % matrix for later analysis
                     obj.history(i, j, 1) = obj.particles(j).pos_x;
                     obj.history(i, j, 2) = obj.particles(j).pos_y;
                     obj.history(i, j, 3) = obj.particles(j).crnt_val;
                 end
 
+                % Loop through each particle and update the global best position
                 for j = 1:obj.num_particles
                     if obj.particles(j).best_val < obj.gbest_val
                         obj.gbest_x = obj.particles(j).pos_x;
@@ -97,11 +108,16 @@ classdef swarm < handle
                         obj.gbest_val = obj.particles(j).best_val;
                     end
 
+                    % Check if the particle has made progress within the
+                    % last patience iterations
                     if obj.particles(j).no_progress_count < obj.patience
                         no_progress = false;
                     end
                 end
 
+                % if no particle has made progress within the last patience
+                % iterations, break out of the loop... we're assuming that
+                % all particles have converged to some minimum
                 if no_progress
                     iters = i;
                     break;
@@ -133,6 +149,8 @@ classdef swarm < handle
             avg_z = avg_z / obj.num_particles;
         end
 
+        % Helper function to find the iteration at which the first minimum
+        % value was found based on the history of the swarm
         function iters = iters_to_first_min(obj)
             % find the minimum value in the history
             min_val = obj.history(1, 1, 3);
